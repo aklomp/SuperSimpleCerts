@@ -3,6 +3,8 @@
 #include <gtk/gtk.h>
 
 #include "mainwindow.h"
+#include "treestore.h"
+#include "treeview.h"
 
 void
 on_destroy ()
@@ -72,6 +74,9 @@ ui_main (int argc, char **argv, char *app_name)
 	// Fetch handle to main window:
 	GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
 	gtk_window_set_title(GTK_WINDOW(window), app_name);
+
+	treestore_init(builder);
+	treeview_init(builder);
 
 	// Destroy builder, show window, run event loop:
 	g_object_unref(G_OBJECT(builder));

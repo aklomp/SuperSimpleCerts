@@ -8,7 +8,7 @@ GTK_LDFLAGS = `pkg-config --libs gtk+-3.0`
 .INTERMEDIATE: mainwindow.gz mainwindow.h
 
 PROG = supersimplecerts
-OBJS = main.o mainwindow.o ui.o
+OBJS = main.o mainwindow.o treestore.o treeview.o ui.o
 
 $(PROG): $(OBJS)
 	$(CC) $(GTK_LDFLAGS) $(LDFLAGS) $^ -o $@
@@ -26,6 +26,12 @@ mainwindow.gz: mainwindow.glade
 
 mainwindow.h: mainwindow.glade
 	echo "#define MAINWINDOW_SIZE `wc -c $^ | cut -f1 -d\ `" > $@
+
+treestore.o: treestore.c
+	$(CC) $(GTK_CFLAGS) $(CFLAGS) -c $^ -o $@
+
+treeview.o: treeview.c
+	$(CC) $(GTK_CFLAGS) $(CFLAGS) -c $^ -o $@
 
 ui.o: ui.c mainwindow.h
 	$(CC) $(GTK_CFLAGS) $(CFLAGS) -c ui.c -o $@
