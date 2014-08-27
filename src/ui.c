@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdlib.h>
 #include <zlib.h>
 #include <gtk/gtk.h>
@@ -5,49 +6,88 @@
 #include "mainwindow.h"
 #include "treestore.h"
 #include "treeview.h"
+#include "workspace.h"
+
+static bool
+save_workspace_dialog ()
+{
+	// Run a dialog window asking if the user wants to save the workspace:
+	return true;
+}
+
+static bool
+clearout_workspace (struct workspace **ws)
+{
+	// Close and destroy the current workspace;
+	// returns true on success, false on failure:
+	if (*ws == NULL) {
+		return true;
+	}
+	if (workspace_dirty(*ws) && save_workspace_dialog()) {
+		if (workspace_save(*ws) == false) {
+			return false;
+		}
+	}
+	workspace_close(ws);
+	return true;
+}
 
 void
-on_destroy (GtkWidget *object, void *data)
+on_destroy (GtkWidget *object, struct workspace **ws)
 {
 	(void)object;
-	(void)data;
 
+	if (clearout_workspace(ws) == false) {
+		return;
+	}
 	gtk_main_quit();
 }
 
 void
-on_menu_new (GtkImageMenuItem *item, void *data)
+on_menu_new (GtkImageMenuItem *item, struct workspace **ws)
 {
 	(void)item;
-	(void)data;
+
+	if (clearout_workspace(ws) == false) {
+		return;
+	}
+	if ((*ws = workspace_new()) == NULL) {
+		return;
+	}
 }
 
 void
-on_menu_open (GtkImageMenuItem *item, void *data)
+on_menu_open (GtkImageMenuItem *item, struct workspace **ws)
 {
 	(void)item;
-	(void)data;
+
+	if (clearout_workspace(ws) == false) {
+		return;
+	}
 }
 
 void
-on_menu_save (GtkImageMenuItem *item, void *data)
+on_menu_save (GtkImageMenuItem *item, struct workspace **ws)
 {
 	(void)item;
-	(void)data;
+
+	if (workspace_save(*ws) == false) {
+		return;
+	}
 }
 
 void
-on_menu_saveas (GtkImageMenuItem *item, void *data)
+on_menu_saveas (GtkImageMenuItem *item, struct workspace **ws)
 {
 	(void)item;
-	(void)data;
+	(void)ws;
 }
 
 void
-on_menu_about (GtkImageMenuItem *item, void *data)
+on_menu_about (GtkImageMenuItem *item, struct workspace **ws)
 {
 	(void)item;
-	(void)data;
+	(void)ws;
 }
 
 static char *
@@ -93,6 +133,7 @@ int
 ui_main (int argc, char **argv, char *app_name)
 {
 	char *mainwindow;
+	struct workspace *ws = NULL;
 
 	gtk_init(&argc, &argv);
 
@@ -106,8 +147,8 @@ ui_main (int argc, char **argv, char *app_name)
 		free(mainwindow);
 		return 1;
 	}
-	// Hookup signals:
-	gtk_builder_connect_signals(builder, NULL);
+	// Hookup signals, pass the workspace to every handler:
+	gtk_builder_connect_signals(builder, &ws);
 
 	// Fetch handle to main window:
 	GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
