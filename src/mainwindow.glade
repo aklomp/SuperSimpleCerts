@@ -38,6 +38,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <signal name="activate" handler="on_menu_new" swapped="no"/>
                       </object>
                     </child>
                     <child>
@@ -47,6 +48,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <signal name="activate" handler="on_menu_open" swapped="no"/>
                       </object>
                     </child>
                     <child>
@@ -56,6 +58,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <signal name="activate" handler="on_menu_save" swapped="no"/>
                       </object>
                     </child>
                     <child>
@@ -65,6 +68,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <signal name="activate" handler="on_menu_saveas" swapped="no"/>
                       </object>
                     </child>
                     <child>
@@ -104,6 +108,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <signal name="activate" handler="on_menu_about" swapped="no"/>
                       </object>
                     </child>
                   </object>

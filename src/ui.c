@@ -7,9 +7,47 @@
 #include "treeview.h"
 
 void
-on_destroy ()
+on_destroy (GtkWidget *object, void *data)
 {
+	(void)object;
+	(void)data;
+
 	gtk_main_quit();
+}
+
+void
+on_menu_new (GtkImageMenuItem *item, void *data)
+{
+	(void)item;
+	(void)data;
+}
+
+void
+on_menu_open (GtkImageMenuItem *item, void *data)
+{
+	(void)item;
+	(void)data;
+}
+
+void
+on_menu_save (GtkImageMenuItem *item, void *data)
+{
+	(void)item;
+	(void)data;
+}
+
+void
+on_menu_saveas (GtkImageMenuItem *item, void *data)
+{
+	(void)item;
+	(void)data;
+}
+
+void
+on_menu_about (GtkImageMenuItem *item, void *data)
+{
+	(void)item;
+	(void)data;
 }
 
 static char *
