@@ -1,6 +1,6 @@
 struct workspace
 {
-	char *certs;
+	struct cert *certs;
 };
 
 struct workspace *workspace_new (void);

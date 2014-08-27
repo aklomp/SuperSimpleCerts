@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "cert.h"
 #include "workspace.h"
 
 static struct workspace *
@@ -22,7 +23,7 @@ destroy (struct workspace *ws)
 	if (ws == NULL) {
 		return;
 	}
-	free(ws->certs);
+	cert_destroy(&ws->certs);
 	free(ws);
 }
 

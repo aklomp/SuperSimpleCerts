@@ -8,10 +8,13 @@ GTK_LDFLAGS = `pkg-config --libs gtk+-3.0`
 .INTERMEDIATE: mainwindow.gz mainwindow.h
 
 PROG = supersimplecerts
-OBJS = main.o mainwindow.o treestore.o treeview.o ui.o workspace.o
+OBJS = cert.o main.o mainwindow.o treestore.o treeview.o ui.o workspace.o
 
 $(PROG): $(OBJS)
 	$(CC) $(GTK_LDFLAGS) $(LDFLAGS) $^ -o $@
+
+cert.o: cert.c
+	$(CC) $(CFLAGS) -c $^ -o $@
 
 main.o: main.c
 	$(CC) $(CFLAGS) -c $^ -o $@
@@ -37,7 +40,7 @@ ui.o: ui.c mainwindow.h
 	$(CC) $(GTK_CFLAGS) $(CFLAGS) -c ui.c -o $@
 
 workspace.o: workspace.c
-	$(CC) $(CFLAGS) -c $^ -o $@
+	$(CC) $(GTK_CFLAGS) $(CFLAGS) -c $^ -o $@
 
 clean:
 	rm -f $(OBJS) $(PROG)

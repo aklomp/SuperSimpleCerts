@@ -3,6 +3,7 @@
 #include <zlib.h>
 #include <gtk/gtk.h>
 
+#include "cert.h"
 #include "mainwindow.h"
 #include "treestore.h"
 #include "treeview.h"
@@ -29,7 +30,6 @@ clearout_workspace (struct workspace **ws)
 		}
 	}
 	workspace_close(ws);
-	treestore_empty();
 	return true;
 }
 

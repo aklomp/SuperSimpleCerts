@@ -5,6 +5,8 @@
     <columns>
       <!-- column-name label -->
       <column type="gchararray"/>
+      <!-- column-name cert -->
+      <column type="gpointer"/>
     </columns>
   </object>
   <object class="GtkWindow" id="window">
