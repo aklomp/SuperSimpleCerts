@@ -29,6 +29,7 @@ clearout_workspace (struct workspace **ws)
 		}
 	}
 	workspace_close(ws);
+	treestore_empty();
 	return true;
 }
 
