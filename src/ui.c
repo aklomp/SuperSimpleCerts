@@ -158,11 +158,15 @@ ui_main (int argc, char **argv, char *app_name)
 	treestore_init(builder);
 	treeview_init(builder);
 
-	// Destroy builder, show window, run event loop:
-	g_object_unref(G_OBJECT(builder));
+	// Show window:
 	gtk_widget_show(window);
 
+	// Run event loop:
 	gtk_main();
+
+	// Wait until the event loop returns to destroy the builder;
+	// we need the reference to stay live for popup menus and subwindows:
+	g_object_unref(G_OBJECT(builder));
 
 	free(mainwindow);
 	return 0;

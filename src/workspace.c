@@ -85,6 +85,7 @@ workspace_add_selfsigned_ca (struct workspace *ws)
 	if ((cert = cert_new(NULL, true, true)) == NULL) {
 		return NULL;
 	}
+	cert_set_displayname(cert, "New Selfsigned CA");
 	treestore_append_root(&child, cert);
 	return cert;
 }
@@ -100,6 +101,7 @@ workspace_add_selfsigned (struct workspace *ws)
 	if ((cert = cert_new(NULL, true, false)) == NULL) {
 		return NULL;
 	}
+	cert_set_displayname(cert, "New Selfsigned");
 	treestore_append_root(&child, cert);
 	return cert;
 }
@@ -121,6 +123,7 @@ workspace_add_child (struct workspace *ws, GtkTreeIter *parentIter)
 	if ((child = cert_new(parent, false, false)) == NULL) {
 		return NULL;
 	}
+	cert_set_displayname(child, "New Child");
 	treestore_append_child(parentIter, &childIter, child);
 	return child;
 }
