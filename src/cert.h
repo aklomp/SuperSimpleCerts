@@ -13,6 +13,6 @@ struct cert
 	bool is_ca;
 };
 
-struct cert *cert_new (void);
+struct cert *cert_new (struct cert *parent, bool is_selfsigned, bool is_ca);
 void cert_destroy (struct cert **cert);
 void cert_set_displayname (struct cert *cert, const char *const displayname);

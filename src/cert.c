@@ -5,7 +5,7 @@
 #include "cert.h"
 
 static struct cert *
-create (void)
+create (struct cert *parent, bool is_selfsigned, bool is_ca)
 {
 	struct cert *cert;
 
@@ -17,9 +17,9 @@ create (void)
 	cert->serial = NULL;
 	cert->not_before = NULL;
 	cert->not_after = NULL;
-	cert->parent = NULL;
-	cert->is_selfsigned = false;
-	cert->is_ca = false;
+	cert->parent = parent;
+	cert->is_selfsigned = is_selfsigned;
+	cert->is_ca = is_ca;
 
 	return cert;
 }
@@ -39,9 +39,9 @@ destroy (struct cert *cert)
 }
 
 struct cert *
-cert_new (void)
+cert_new (struct cert *parent, bool is_selfsigned, bool is_ca)
 {
-	return create();
+	return create(parent, is_selfsigned, is_ca);
 }
 
 void

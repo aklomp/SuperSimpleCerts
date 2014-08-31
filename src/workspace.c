@@ -73,3 +73,70 @@ workspace_close (struct workspace **ws)
 	destroy(*ws);
 	*ws = NULL;
 }
+
+struct cert *
+workspace_add_selfsigned_ca (struct workspace *ws)
+{
+	// Add a new selfsigned CA template to the end of the root list:
+	(void)ws;
+	struct cert *cert;
+	GtkTreeIter child;
+
+	if ((cert = cert_new(NULL, true, true)) == NULL) {
+		return NULL;
+	}
+	treestore_append_root(&child, cert);
+	return cert;
+}
+
+struct cert *
+workspace_add_selfsigned (struct workspace *ws)
+{
+	// Add a new selfsigned template to the end of the root list;
+	(void)ws;
+	struct cert *cert;
+	GtkTreeIter child;
+
+	if ((cert = cert_new(NULL, true, false)) == NULL) {
+		return NULL;
+	}
+	treestore_append_root(&child, cert);
+	return cert;
+}
+
+struct cert *
+workspace_add_child (struct workspace *ws, GtkTreeIter *parentIter)
+{
+	// Add a new child below an existing certificate:
+	(void)ws;
+
+	struct cert *parent;
+	struct cert *child;
+	GtkTreeIter childIter;
+
+	// Get parent cert:
+	if ((parent = treestore_cert_from_iter(parentIter)) == NULL) {
+		return NULL;
+	}
+	if ((child = cert_new(parent, false, false)) == NULL) {
+		return NULL;
+	}
+	treestore_append_child(parentIter, &childIter, child);
+	return child;
+}
+
+void
+workspace_delete_cert (struct workspace *ws, GtkTreeIter *iter)
+{
+	struct cert *cert;
+
+	if ((cert = treestore_cert_from_iter(iter)) == NULL) {
+		return;
+	}
+	// If this is the first cert of the lot, clear the pointer:
+	if (ws->certs == cert) {
+		ws->certs = NULL;
+	}
+	// Recursively destroy cert and children; reset prev/next pointers:
+	cert_destroy(&cert);
+}

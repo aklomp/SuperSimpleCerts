@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <string.h>
 #include <gtk/gtk.h>
 
 #include "cert.h"
@@ -30,6 +31,37 @@ treestore_cert_from_iter (GtkTreeIter *iter)
 	struct cert *cert;
 	gtk_tree_model_get(GTK_TREE_MODEL(treestore), iter, 1, &cert, -1);
 	return cert;
+}
+
+struct data_find_cert
+{
+	const struct cert *cert;
+	GtkTreeIter *iter;
+	bool found;
+};
+
+static gboolean
+callback_find_cert (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, void *data)
+{
+	struct data_find_cert *userdata = data;
+
+	(void)model;
+	(void)path;
+
+	if (treestore_cert_from_iter(iter) == userdata->cert) {
+		memcpy(userdata->iter, iter, sizeof(*iter));
+		userdata->found = true;
+		return TRUE;
+	}
+	return FALSE;
+}
+
+bool
+treestore_find_cert (const struct cert *cert, GtkTreeIter *iter)
+{
+	struct data_find_cert userdata = { .cert = cert, .iter = iter, .found = false };
+	gtk_tree_model_foreach(GTK_TREE_MODEL(treestore), (GtkTreeModelForeachFunc)callback_find_cert, &userdata);
+	return userdata.found;
 }
 
 struct data_foreach_cert
