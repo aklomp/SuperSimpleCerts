@@ -24,6 +24,14 @@ treestore_empty (void)
 	gtk_tree_store_clear(treestore);
 }
 
+struct cert *
+treestore_cert_from_iter (GtkTreeIter *iter)
+{
+	struct cert *cert;
+	gtk_tree_model_get(GTK_TREE_MODEL(treestore), iter, 1, &cert, -1);
+	return cert;
+}
+
 struct data_foreach_cert
 {
 	void (*callback)(struct cert *);
@@ -32,12 +40,12 @@ struct data_foreach_cert
 static gboolean
 callback_foreach_cert (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, void *data)
 {
-	struct cert *cert;
 	struct data_foreach_cert *userdata = data;
 
+	(void)model;
 	(void)path;
-	gtk_tree_model_get(model, iter, 1, &cert, -1);
-	userdata->callback(cert);
+	userdata->callback(treestore_cert_from_iter(iter));
+
 	return FALSE;
 }
 
