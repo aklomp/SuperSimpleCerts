@@ -192,6 +192,7 @@
                 <property name="can_focus">True</property>
                 <property name="model">treestore</property>
                 <signal name="button-press-event" handler="on_treeview_button_press" swapped="no"/>
+                <signal name="row-activated" handler="on_treeview_row_activated" swapped="no"/>
                 <signal name="popup-menu" handler="on_treeview_popup_menu" swapped="no"/>
                 <child internal-child="selection">
                   <object class="GtkTreeSelection" id="treeview-selection1"/>

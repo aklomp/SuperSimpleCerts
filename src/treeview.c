@@ -102,21 +102,27 @@ on_popupmenu_ssc_delete (GtkMenuItem *menuitem, struct workspace **ws)
 void
 on_treeview_button_press (GtkTreeView *treeview, GdkEventButton *event, struct workspace **ws)
 {
-	if (event->type != GDK_BUTTON_PRESS) {
-		return;
-	}
 	GtkTreePath *path;
+	GtkTreeViewColumn *column;
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
 	gboolean got_iter;
 
 	gtk_tree_selection_unselect_all(selection);
 
 	// Get path at click position:
-	if ((got_iter = gtk_tree_view_get_path_at_pos(treeview, event->x, event->y, &path, NULL, NULL, NULL)))
+	if ((got_iter = gtk_tree_view_get_path_at_pos(treeview, event->x, event->y, &path, &column, NULL, NULL)))
 	{
 		// Select the row we clicked on:
 		gtk_tree_selection_select_path(selection, path);
 
+		// Is this a left double-click on a path?
+		if (event->type == GDK_2BUTTON_PRESS && event->button == 1)
+		{
+			// Send activation signal for row:
+			gtk_tree_view_row_activated(treeview, path, column);
+			gtk_tree_path_free(path);
+			return;
+		}
 		// Use the workspace to store the iter on which to popup:
 		treestore_get_iter(path, &(*ws)->popupIter);
 
@@ -144,6 +150,19 @@ on_treeview_popup_menu (GtkTreeView *treeview, struct workspace **ws)
 		gtk_tree_selection_get_selected(selection, NULL, &(*ws)->popupIter);
 	}
 	on_rightclick(treeview, NULL, got_iter, ws);
+}
+
+void
+on_treeview_row_activated (GtkTreeView *treeview, GtkTreePath *path)
+{
+	// This signal is raised when a user double-clicks on a row;
+	// toggle row collapse:
+
+	if (gtk_tree_view_row_expanded(treeview, path)) {
+		gtk_tree_view_collapse_row(treeview, path);
+		return;
+	}
+	gtk_tree_view_expand_row(treeview, path, TRUE);
 }
 
 void
