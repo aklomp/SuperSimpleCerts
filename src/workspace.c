@@ -4,6 +4,7 @@
 
 #include "cert.h"
 #include "treestore.h"
+#include "treeview.h"
 #include "workspace.h"
 
 static struct workspace *
@@ -125,6 +126,9 @@ workspace_add_child (struct workspace *ws, GtkTreeIter *parentIter)
 	}
 	cert_set_displayname(child, "New Child");
 	treestore_append_child(parentIter, &childIter, child);
+
+	// Expand child node in treeview; find its path:
+	treeview_expand_iter(&childIter);
 	return child;
 }
 

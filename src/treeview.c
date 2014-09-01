@@ -5,6 +5,7 @@
 #include "treestore.h"
 #include "workspace.h"
 
+static GtkTreeView *treeview = NULL;
 static GtkTreeViewColumn *column = NULL;
 static GtkMenu *popupmenublank = NULL;
 static GtkMenu *popupmenuca = NULL;
@@ -146,9 +147,19 @@ on_treeview_popup_menu (GtkTreeView *treeview, struct workspace **ws)
 }
 
 void
+treeview_expand_iter (GtkTreeIter *iter)
+{
+	// Find path corresponding to iter, expand view till there:
+	GtkTreePath *path = gtk_tree_model_get_path(gtk_tree_view_get_model(treeview), iter);
+	gtk_tree_view_expand_to_path(treeview, path);
+	gtk_tree_path_free(path);
+}
+
+void
 treeview_init (GtkBuilder *builder)
 {
 	// Initialize our static variables from the Builder instance:
+	treeview = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview"));
 	column = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder, "treeviewcolumn"));
 	popupmenublank = GTK_MENU(gtk_builder_get_object(builder, "popupmenublank"));
 	popupmenuca = GTK_MENU(gtk_builder_get_object(builder, "popupmenuca"));
