@@ -45,6 +45,19 @@
       </object>
     </child>
   </object>
+  <object class="GtkMenu" id="popupmenussc">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem" id="popupmenu_ssc_delete">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Delete</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_popupmenu_ssc_delete" swapped="no"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkTreeStore" id="treestore">
     <columns>
       <!-- column-name label -->

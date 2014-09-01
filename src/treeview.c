@@ -8,18 +8,7 @@
 static GtkTreeViewColumn *column = NULL;
 static GtkMenu *popupmenublank = NULL;
 static GtkMenu *popupmenuca = NULL;
-
-static void
-show_popup_menu_blank (GdkEventButton *event)
-{
-	gtk_menu_popup(popupmenublank, NULL, NULL, NULL, NULL, (event != NULL) ? event->button : 0, gdk_event_get_time((GdkEvent*)event));
-}
-
-static void
-show_popup_menu_ca (GdkEventButton *event)
-{
-	gtk_menu_popup(popupmenuca, NULL, NULL, NULL, NULL, (event != NULL) ? event->button : 0, gdk_event_get_time((GdkEvent*)event));
-}
+static GtkMenu *popupmenussc = NULL;
 
 static void
 on_leftclick (GtkTreeView *treeview, GdkEventButton *event, gboolean got_iter, struct workspace **ws)
@@ -34,21 +23,24 @@ static void
 on_rightclick (GtkTreeView *treeview, GdkEventButton *event, gboolean got_iter, struct workspace **ws)
 {
 	struct cert *cert;
+	GtkMenu *menu = popupmenublank;
 
 	(void)treeview;
 
-	// Not on a path: show generic workspace popup menu:
-	if (got_iter == FALSE) {
-		show_popup_menu_blank(event);
-		return;
+	if (got_iter != FALSE)
+	{
+		// Fetch the certificate:
+		if ((cert = treestore_cert_from_iter(&(*ws)->popupIter)) == NULL) {
+			return;
+		}
+		if (cert->is_ca) {
+			menu = popupmenuca;
+		}
+		else if (cert->is_selfsigned) {
+			menu = popupmenussc;
+		}
 	}
-	// Fetch the certificate:
-	if ((cert = treestore_cert_from_iter(&(*ws)->popupIter)) == NULL) {
-		return;
-	}
-	if (cert->is_ca) {
-		show_popup_menu_ca(event);
-	}
+	gtk_menu_popup(menu, NULL, NULL, NULL, NULL, (event != NULL) ? event->button : 0, gdk_event_get_time((GdkEvent*)event));
 }
 
 void
@@ -90,6 +82,15 @@ on_popupmenu_ca_create_child (GtkMenuItem *menuitem, struct workspace **ws)
 
 void
 on_popupmenu_ca_delete (GtkMenuItem *menuitem, struct workspace **ws)
+{
+	(void)menuitem;
+
+	// The iter on which to operate was saved in the workspace:
+	workspace_delete_cert(*ws, &(*ws)->popupIter);
+}
+
+void
+on_popupmenu_ssc_delete (GtkMenuItem *menuitem, struct workspace **ws)
 {
 	(void)menuitem;
 
@@ -151,6 +152,7 @@ treeview_init (GtkBuilder *builder)
 	column = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder, "treeviewcolumn"));
 	popupmenublank = GTK_MENU(gtk_builder_get_object(builder, "popupmenublank"));
 	popupmenuca = GTK_MENU(gtk_builder_get_object(builder, "popupmenuca"));
+	popupmenussc = GTK_MENU(gtk_builder_get_object(builder, "popupmenussc"));
 
 	// Add text renderer for first column:
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
