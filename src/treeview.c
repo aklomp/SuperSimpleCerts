@@ -10,6 +10,7 @@ static GtkTreeViewColumn *column = NULL;
 static GtkMenu *popupmenublank = NULL;
 static GtkMenu *popupmenuca = NULL;
 static GtkMenu *popupmenussc = NULL;
+static GtkMenu *popupmenuchild = NULL;
 
 static void
 on_leftclick (GtkTreeView *treeview, GdkEventButton *event, gboolean got_iter, struct workspace **ws)
@@ -39,6 +40,9 @@ on_rightclick (GtkTreeView *treeview, GdkEventButton *event, gboolean got_iter, 
 		}
 		else if (cert->is_selfsigned) {
 			menu = popupmenussc;
+		}
+		else {
+			menu = popupmenuchild;
 		}
 	}
 	gtk_menu_popup(menu, NULL, NULL, NULL, NULL, (event != NULL) ? event->button : 0, gdk_event_get_time((GdkEvent*)event));
@@ -92,6 +96,15 @@ on_popupmenu_ca_delete (GtkMenuItem *menuitem, struct workspace **ws)
 
 void
 on_popupmenu_ssc_delete (GtkMenuItem *menuitem, struct workspace **ws)
+{
+	(void)menuitem;
+
+	// The iter on which to operate was saved in the workspace:
+	workspace_delete_cert(*ws, &(*ws)->popupIter);
+}
+
+void
+on_popupmenu_child_delete (GtkMenuItem *menuitem, struct workspace **ws)
 {
 	(void)menuitem;
 
@@ -183,6 +196,7 @@ treeview_init (GtkBuilder *builder)
 	popupmenublank = GTK_MENU(gtk_builder_get_object(builder, "popupmenublank"));
 	popupmenuca = GTK_MENU(gtk_builder_get_object(builder, "popupmenuca"));
 	popupmenussc = GTK_MENU(gtk_builder_get_object(builder, "popupmenussc"));
+	popupmenuchild = GTK_MENU(gtk_builder_get_object(builder, "popupmenuchild"));
 
 	// Add text renderer for first column:
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
