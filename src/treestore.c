@@ -66,6 +66,7 @@ treestore_find_cert (const struct cert *cert, GtkTreeIter *iter)
 
 struct data_foreach_cert
 {
+	GtkTreeIter *parentIter;
 	void (*callback)(struct cert *);
 };
 
@@ -76,15 +77,28 @@ callback_foreach_cert (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter
 
 	(void)model;
 	(void)path;
-	userdata->callback(treestore_cert_from_iter(iter));
 
+	// If parent iter given, check if this node is a descendant; else skip:
+	if (userdata->parentIter != NULL) {
+		if (gtk_tree_store_is_ancestor(treestore, userdata->parentIter, iter) == FALSE) {
+			return FALSE;
+		}
+	}
+	userdata->callback(treestore_cert_from_iter(iter));
 	return FALSE;
 }
 
 void
-treestore_foreach_cert (void (*callback)(struct cert *))
+treestore_foreach_cert (struct cert *parent, void (*callback)(struct cert *))
 {
-	struct data_foreach_cert userdata = { .callback = callback };
+	GtkTreeIter parentIter;
+	struct data_foreach_cert userdata = { .parentIter = NULL, .callback = callback };
+
+	if (parent != NULL) {
+		if (treestore_find_cert(parent, &parentIter) != false) {
+			userdata.parentIter = &parentIter;
+		}
+	}
 	gtk_tree_model_foreach(GTK_TREE_MODEL(treestore), (GtkTreeModelForeachFunc)callback_foreach_cert, &userdata);
 }
 

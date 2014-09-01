@@ -31,7 +31,7 @@ destroy (struct workspace *ws)
 	if (ws == NULL) {
 		return;
 	}
-	treestore_foreach_cert(callback_destroy_cert);
+	treestore_foreach_cert(NULL, callback_destroy_cert);
 	treestore_empty();
 }
 
