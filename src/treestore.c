@@ -115,6 +115,12 @@ treestore_append_child (GtkTreeIter *parent, GtkTreeIter *child, const struct ce
 }
 
 void
+treestore_delete_row (GtkTreeIter *iter)
+{
+	gtk_tree_store_remove(treestore, iter);
+}
+
+void
 treestore_init (GtkBuilder *builder)
 {
 	// Initialize our static variables from the Builder instance:

@@ -140,6 +140,13 @@ workspace_delete_cert (struct workspace *ws, GtkTreeIter *iter)
 	if (ws->certs == cert) {
 		ws->certs = NULL;
 	}
-	// Recursively destroy cert and children; reset prev/next pointers:
+	// Destroy all descendent certs:
+	treestore_foreach_cert(cert, callback_destroy_cert);
+
+	// Remove row in treestore:
+	// TODO: does this also delete all children?
+	treestore_delete_row(iter);
+
+	// Destroy self:
 	cert_destroy(&cert);
 }
