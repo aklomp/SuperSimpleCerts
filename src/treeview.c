@@ -2,10 +2,12 @@
 #include <gtk/gtk.h>
 
 #include "cert.h"
+#include "treestore.h"
 #include "workspace.h"
 
 static GtkTreeViewColumn *column = NULL;
 static GtkMenu *popupmenublank = NULL;
+static GtkMenu *popupmenuca = NULL;
 
 static void
 show_popup_menu_blank (GdkEventButton *event)
@@ -14,26 +16,46 @@ show_popup_menu_blank (GdkEventButton *event)
 }
 
 static void
-on_leftclick (GtkTreeView *treeview, GdkEventButton *event, gboolean got_path, GtkTreePath *path)
+show_popup_menu_ca (GdkEventButton *event)
 {
-	(void)treeview;
-	(void)event;
-	(void)got_path;
-	(void)path;
+	gtk_menu_popup(popupmenuca, NULL, NULL, NULL, NULL, (event != NULL) ? event->button : 0, gdk_event_get_time((GdkEvent*)event));
 }
 
 static void
-on_rightclick (GtkTreeView *treeview, GdkEventButton *event, gboolean got_path, GtkTreePath *path)
+on_leftclick (GtkTreeView *treeview, GdkEventButton *event, gboolean got_path, GtkTreePath *path, struct workspace **ws)
 {
 	(void)treeview;
 	(void)event;
 	(void)got_path;
 	(void)path;
+	(void)ws;
+}
+
+static void
+on_rightclick (GtkTreeView *treeview, GdkEventButton *event, gboolean got_path, GtkTreePath *path, struct workspace **ws)
+{
+	struct cert *cert;
+
+	(void)treeview;
+	(void)event;
+	(void)got_path;
 
 	// Not on a path: show generic workspace popup menu:
 	if (got_path == FALSE) {
 		show_popup_menu_blank(event);
 		return;
+	}
+	// Save the iter on which we're opening a menu to the workspace,
+	// otherwise we lose this context:
+	if (treestore_get_iter(path, &(*ws)->popupIter) == false) {
+		return;
+	}
+	// Fetch the certificate:
+	if ((cert = treestore_cert_from_iter(&(*ws)->popupIter)) == NULL) {
+		return;
+	}
+	if (cert->is_ca) {
+		show_popup_menu_ca(event);
 	}
 }
 
@@ -66,7 +88,25 @@ on_popupmenu_new_ssc (GtkMenuItem *menuitem, struct workspace **ws)
 }
 
 void
-on_treeview_button_press (GtkTreeView *treeview, GdkEventButton *event)
+on_popupmenu_ca_create_child (GtkMenuItem *menuitem, struct workspace **ws)
+{
+	(void)menuitem;
+
+	// The iter on which to operate was saved in the workspace:
+	workspace_add_child(*ws, &(*ws)->popupIter);
+}
+
+void
+on_popupmenu_ca_delete (GtkMenuItem *menuitem, struct workspace **ws)
+{
+	(void)menuitem;
+
+	// The iter on which to operate was saved in the workspace:
+	workspace_delete_cert(*ws, &(*ws)->popupIter);
+}
+
+void
+on_treeview_button_press (GtkTreeView *treeview, GdkEventButton *event, void *data)
 {
 	if (event->type != GDK_BUTTON_PRESS) {
 		return;
@@ -83,8 +123,8 @@ on_treeview_button_press (GtkTreeView *treeview, GdkEventButton *event)
 	}
 	// Dispatch event:
 	switch (event->button) {
-		case 1: on_leftclick(treeview, event, got_path, path); break;
-		case 3: on_rightclick(treeview, event, got_path, path); break;
+		case 1: on_leftclick(treeview, event, got_path, path, data); break;
+		case 3: on_rightclick(treeview, event, got_path, path, data); break;
 	}
 	gtk_tree_path_free(path);
 }
@@ -102,6 +142,7 @@ treeview_init (GtkBuilder *builder)
 	// Initialize our static variables from the Builder instance:
 	column = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder, "treeviewcolumn"));
 	popupmenublank = GTK_MENU(gtk_builder_get_object(builder, "popupmenublank"));
+	popupmenuca = GTK_MENU(gtk_builder_get_object(builder, "popupmenuca"));
 
 	// Add text renderer for first column:
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();

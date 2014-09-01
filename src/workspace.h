@@ -1,6 +1,7 @@
 struct workspace
 {
 	struct cert *certs;
+	GtkTreeIter popupIter;
 };
 
 struct workspace *workspace_new (void);

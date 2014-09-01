@@ -23,6 +23,28 @@
       </object>
     </child>
   </object>
+  <object class="GtkMenu" id="popupmenuca">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem" id="popupmenu_ca_create_child">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">New child certificate</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_popupmenu_ca_create_child" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="popupmenu_ca_delete">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Delete</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_popupmenu_ca_delete" swapped="no"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkTreeStore" id="treestore">
     <columns>
       <!-- column-name label -->

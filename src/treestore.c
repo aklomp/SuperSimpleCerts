@@ -25,6 +25,12 @@ treestore_empty (void)
 	gtk_tree_store_clear(treestore);
 }
 
+bool
+treestore_get_iter (GtkTreePath *path, GtkTreeIter *iter)
+{
+	return gtk_tree_model_get_iter(GTK_TREE_MODEL(treestore), iter, path);
+}
+
 struct cert *
 treestore_cert_from_iter (GtkTreeIter *iter)
 {
