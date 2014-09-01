@@ -22,32 +22,24 @@ show_popup_menu_ca (GdkEventButton *event)
 }
 
 static void
-on_leftclick (GtkTreeView *treeview, GdkEventButton *event, gboolean got_path, GtkTreePath *path, struct workspace **ws)
+on_leftclick (GtkTreeView *treeview, GdkEventButton *event, gboolean got_iter, struct workspace **ws)
 {
 	(void)treeview;
 	(void)event;
-	(void)got_path;
-	(void)path;
+	(void)got_iter;
 	(void)ws;
 }
 
 static void
-on_rightclick (GtkTreeView *treeview, GdkEventButton *event, gboolean got_path, GtkTreePath *path, struct workspace **ws)
+on_rightclick (GtkTreeView *treeview, GdkEventButton *event, gboolean got_iter, struct workspace **ws)
 {
 	struct cert *cert;
 
 	(void)treeview;
-	(void)event;
-	(void)got_path;
 
 	// Not on a path: show generic workspace popup menu:
-	if (got_path == FALSE) {
+	if (got_iter == FALSE) {
 		show_popup_menu_blank(event);
-		return;
-	}
-	// Save the iter on which we're opening a menu to the workspace,
-	// otherwise we lose this context:
-	if (treestore_get_iter(path, &(*ws)->popupIter) == false) {
 		return;
 	}
 	// Fetch the certificate:
@@ -106,34 +98,50 @@ on_popupmenu_ca_delete (GtkMenuItem *menuitem, struct workspace **ws)
 }
 
 void
-on_treeview_button_press (GtkTreeView *treeview, GdkEventButton *event, void *data)
+on_treeview_button_press (GtkTreeView *treeview, GdkEventButton *event, struct workspace **ws)
 {
 	if (event->type != GDK_BUTTON_PRESS) {
 		return;
 	}
 	GtkTreePath *path;
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
-	gboolean got_path;
+	gboolean got_iter;
 
 	gtk_tree_selection_unselect_all(selection);
 
-	// Get path at click position, select it:
-	if ((got_path = gtk_tree_view_get_path_at_pos(treeview, event->x, event->y, &path, NULL, NULL, NULL))) {
+	// Get path at click position:
+	if ((got_iter = gtk_tree_view_get_path_at_pos(treeview, event->x, event->y, &path, NULL, NULL, NULL)))
+	{
+		// Select the row we clicked on:
 		gtk_tree_selection_select_path(selection, path);
+
+		// Use the workspace to store the iter on which to popup:
+		treestore_get_iter(path, &(*ws)->popupIter);
+
+		// Release path:
+		gtk_tree_path_free(path);
 	}
 	// Dispatch event:
 	switch (event->button) {
-		case 1: on_leftclick(treeview, event, got_path, path, data); break;
-		case 3: on_rightclick(treeview, event, got_path, path, data); break;
+		case 1: on_leftclick(treeview, event, got_iter, ws); break;
+		case 3: on_rightclick(treeview, event, got_iter, ws); break;
 	}
-	gtk_tree_path_free(path);
 }
 
 void
-on_treeview_popup_menu (void)
+on_treeview_popup_menu (GtkTreeView *treeview, struct workspace **ws)
 {
-	// Handler for the "popup-menu" signal on the Treeview:
-	show_popup_menu_blank(NULL);
+	// Handler for the "popup-menu" signal on the Treeview.
+	// Check if a row is selected:
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
+	gtk_tree_selection_set_mode(selection, GTK_SELECTION_SINGLE);
+	gboolean got_iter;
+
+	// Find the iter of the selected item, if any:
+	if ((got_iter = (gtk_tree_selection_count_selected_rows(selection) > 0))) {
+		gtk_tree_selection_get_selected(selection, NULL, &(*ws)->popupIter);
+	}
+	on_rightclick(treeview, NULL, got_iter, ws);
 }
 
 void
