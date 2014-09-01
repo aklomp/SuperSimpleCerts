@@ -1,7 +1,9 @@
 #include <stdbool.h>
 #include <stdlib.h>
+#include <gtk/gtk.h>
 
 #include "cert.h"
+#include "treestore.h"
 #include "workspace.h"
 
 static struct workspace *
@@ -18,13 +20,19 @@ create (void)
 }
 
 static void
+callback_destroy_cert (struct cert *cert)
+{
+	cert_destroy(&cert);
+}
+
+static void
 destroy (struct workspace *ws)
 {
 	if (ws == NULL) {
 		return;
 	}
-	cert_destroy(&ws->certs);
-	free(ws);
+	treestore_foreach_cert(callback_destroy_cert);
+	treestore_empty();
 }
 
 struct workspace *
