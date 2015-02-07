@@ -8,16 +8,21 @@ GTK_LDFLAGS = `pkg-config --libs gtk+-3.0`
 .INTERMEDIATE: mainwindow.gz mainwindow.h
 
 PROG = supersimplecerts
-OBJS = cert.o main.o mainwindow.o treestore.o treeview.o ui.o workspace.o
 
-$(PROG): $(OBJS)
+GTK_OBJS = \
+  treestore.o \
+  treeview.o \
+  ui.o \
+  workspace.o
+
+OBJS = \
+  cert.o \
+  main.o
+
+ALL_OBJS = $(OBJS) $(GTK_OBJS) mainwindow.o
+
+$(PROG): $(ALL_OBJS)
 	$(CC) $(GTK_LDFLAGS) $(LDFLAGS) $^ -o $@
-
-cert.o: cert.c
-	$(CC) $(CFLAGS) -c $^ -o $@
-
-main.o: main.c
-	$(CC) $(CFLAGS) -c $^ -o $@
 
 # Use linker to generate an "object file" containing the XML interface
 # definition as a string:
@@ -30,17 +35,13 @@ mainwindow.gz: mainwindow.glade
 mainwindow.h: mainwindow.glade
 	echo "#define MAINWINDOW_SIZE `wc -c $^ | cut -f1 -d\ `" > $@
 
-treestore.o: treestore.c
-	$(CC) $(GTK_CFLAGS) $(CFLAGS) -c $^ -o $@
-
-treeview.o: treeview.c
-	$(CC) $(GTK_CFLAGS) $(CFLAGS) -c $^ -o $@
-
 ui.o: ui.c mainwindow.h
-	$(CC) $(GTK_CFLAGS) $(CFLAGS) -c ui.c -o $@
 
-workspace.o: workspace.c
-	$(CC) $(GTK_CFLAGS) $(CFLAGS) -c $^ -o $@
+$(GTK_OBJS): %.o: %.c
+	$(CC) $(GTK_CFLAGS) $(CFLAGS) -c $< -o $@
+
+$(OBJS): %.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJS) $(PROG)
+	rm -f $(ALL_OBJS) $(PROG)
