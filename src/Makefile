@@ -22,7 +22,7 @@ OBJS = \
 ALL_OBJS = $(OBJS) $(GTK_OBJS) mainwindow.o
 
 $(PROG): $(ALL_OBJS)
-	$(CC) $(GTK_LDFLAGS) $(LDFLAGS) $^ -o $@
+	$(CC) -o $@ $^ $(LDFLAGS) $(GTK_LDFLAGS)
 
 # Use linker to generate an "object file" containing the XML interface
 # definition as a string:
