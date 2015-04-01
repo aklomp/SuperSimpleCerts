@@ -1,10 +1,10 @@
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <zlib.h>
 #include <gtk/gtk.h>
 
 #include "cert.h"
-#include "mainwindow.h"
 #include "treestore.h"
 #include "treeview.h"
 #include "workspace.h"
@@ -92,7 +92,7 @@ on_menu_about (GtkImageMenuItem *item, struct workspace **ws)
 }
 
 static char *
-mainwindow_load ()
+mainwindow_load (uint32_t *mainwindow_size)
 {
 	// These symbols refer to the embedded XML interface definition string:
 	extern char _binary_mainwindow_gz_start[];
@@ -100,9 +100,11 @@ mainwindow_load ()
 
 	char *buf;
 
-	// We know the size of the uncompressed XML interface definition
-	// string, because it's written to mainwindow.h at compile time:
-	if ((buf = malloc(MAINWINDOW_SIZE)) == NULL) {
+	// The uncompressed size of a gzip stream is stored in little-endian
+	// format in the last four bytes:
+	*mainwindow_size = *(((uint32_t *)_binary_mainwindow_gz_end) - 1);
+
+	if ((buf = malloc(*mainwindow_size)) == NULL) {
 		return NULL;
 	}
 	// Initialize zlib control structure:
@@ -112,7 +114,7 @@ mainwindow_load ()
 		, .opaque = Z_NULL
 		, .avail_in = _binary_mainwindow_gz_end - _binary_mainwindow_gz_start
 		, .next_in = (Bytef *)_binary_mainwindow_gz_start
-		, .avail_out = MAINWINDOW_SIZE
+		, .avail_out = *mainwindow_size
 		, .next_out = (Bytef *)buf
 		} ;
 
@@ -135,16 +137,17 @@ ui_main (int argc, char **argv, char *app_name)
 {
 	char *mainwindow;
 	struct workspace *ws = NULL;
+	uint32_t mainwindow_size;
 
 	gtk_init(&argc, &argv);
 
 	// Load the XML interface description string:
-	if ((mainwindow = mainwindow_load()) == NULL) {
+	if ((mainwindow = mainwindow_load(&mainwindow_size)) == NULL) {
 		return 1;
 	}
 	// Feed it to the builder:
 	GtkBuilder *builder = gtk_builder_new();
-	if (gtk_builder_add_from_string(builder, mainwindow, MAINWINDOW_SIZE, NULL) == 0) {
+	if (gtk_builder_add_from_string(builder, mainwindow, mainwindow_size, NULL) == 0) {
 		free(mainwindow);
 		return 1;
 	}

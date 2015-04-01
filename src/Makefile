@@ -5,7 +5,7 @@ GTK_CFLAGS  = `pkg-config --cflags gtk+-3.0`
 GTK_LDFLAGS = `pkg-config --libs gtk+-3.0`
 
 .PHONY: clean
-.INTERMEDIATE: mainwindow.gz mainwindow.h
+.INTERMEDIATE: mainwindow.gz
 
 PROG = supersimplecerts
 
@@ -32,10 +32,7 @@ mainwindow.o: mainwindow.gz
 mainwindow.gz: mainwindow.glade
 	gzip -9 < $^ > $@
 
-mainwindow.h: mainwindow.glade
-	echo "#define MAINWINDOW_SIZE `wc -c $^ | cut -f1 -d\ `" > $@
-
-ui.o: ui.c mainwindow.h
+ui.o: ui.c
 
 $(GTK_OBJS): %.o: %.c
 	$(CC) $(GTK_CFLAGS) $(CFLAGS) -c $< -o $@
