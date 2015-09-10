@@ -32,8 +32,6 @@ mainwindow.o: mainwindow.gz
 mainwindow.gz: mainwindow.glade
 	gzip -9 < $^ > $@
 
-ui.o: ui.c
-
 $(GTK_OBJS): %.o: %.c
 	$(CC) $(GTK_CFLAGS) $(CFLAGS) -c $< -o $@
 
