@@ -133,7 +133,7 @@ mainwindow_load (uint32_t *mainwindow_size)
 }
 
 int
-ui_main (int argc, char **argv, char *app_name)
+ui_main (int argc, char **argv, const char *app_name)
 {
 	char *mainwindow;
 	struct workspace *ws = NULL;

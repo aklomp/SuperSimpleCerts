@@ -3,7 +3,7 @@
 int
 main (int argc, char **argv)
 {
-	char *app_name = "SuperSimpleCerts";
+	const char *app_name = "SuperSimpleCerts";
 
 	// Do setup work and argument parsing here:
 
