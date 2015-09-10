@@ -4,7 +4,7 @@ LDFLAGS += -Wl,--export-dynamic -lz
 GTK_CFLAGS  = `pkg-config --cflags gtk+-3.0`
 GTK_LDFLAGS = `pkg-config --libs gtk+-3.0`
 
-.PHONY: clean
+.PHONY: analyze clean
 .INTERMEDIATE: mainwindow.gz
 
 PROG = supersimplecerts
@@ -37,6 +37,9 @@ $(GTK_OBJS): %.o: %.c
 
 $(OBJS): %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
+analyze: clean
+	scan-build --status-bugs make
 
 clean:
 	rm -f $(ALL_OBJS) $(PROG)
