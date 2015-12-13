@@ -16,19 +16,18 @@ save_workspace_dialog ()
 	return true;
 }
 
+// Close and destroy the current workspace;
+// returns true on success, false on failure:
 static bool
 clearout_workspace (struct workspace **ws)
 {
-	// Close and destroy the current workspace;
-	// returns true on success, false on failure:
-	if (*ws == NULL) {
+	if (*ws == NULL)
 		return true;
-	}
-	if (workspace_dirty(*ws) && save_workspace_dialog()) {
-		if (workspace_save(*ws) == false) {
+
+	if (workspace_dirty(*ws) && save_workspace_dialog())
+		if (!workspace_save(*ws))
 			return false;
-		}
-	}
+
 	workspace_close(ws);
 	return true;
 }
@@ -38,9 +37,9 @@ on_destroy (GtkWidget *object, struct workspace **ws)
 {
 	(void)object;
 
-	if (clearout_workspace(ws) == false) {
+	if (!clearout_workspace(ws))
 		return;
-	}
+
 	gtk_main_quit();
 }
 
@@ -49,12 +48,11 @@ on_menu_new (GtkImageMenuItem *item, struct workspace **ws)
 {
 	(void)item;
 
-	if (clearout_workspace(ws) == false) {
+	if (!clearout_workspace(ws))
 		return;
-	}
-	if ((*ws = workspace_new()) == NULL) {
+
+	if (!(*ws = workspace_new()))
 		return;
-	}
 }
 
 void
@@ -62,9 +60,8 @@ on_menu_open (GtkImageMenuItem *item, struct workspace **ws)
 {
 	(void)item;
 
-	if (clearout_workspace(ws) == false) {
+	if (!clearout_workspace(ws))
 		return;
-	}
 }
 
 void
@@ -72,9 +69,8 @@ on_menu_save (GtkImageMenuItem *item, struct workspace **ws)
 {
 	(void)item;
 
-	if (workspace_save(*ws) == false) {
+	if (!workspace_save(*ws))
 		return;
-	}
 }
 
 void
@@ -104,18 +100,18 @@ mainwindow_load (uint32_t *mainwindow_size)
 	// format in the last four bytes:
 	*mainwindow_size = *(((uint32_t *)_binary_mainwindow_gz_end) - 1);
 
-	if ((buf = malloc(*mainwindow_size)) == NULL) {
+	if (!(buf = malloc(*mainwindow_size)))
 		return NULL;
-	}
+
 	// Initialize zlib control structure:
 	z_stream stream =
-		{ .zalloc = Z_NULL
-		, .zfree = Z_NULL
-		, .opaque = Z_NULL
-		, .avail_in = _binary_mainwindow_gz_end - _binary_mainwindow_gz_start
-		, .next_in = (Bytef *)_binary_mainwindow_gz_start
+		{ .zalloc    = Z_NULL
+		, .zfree     = Z_NULL
+		, .opaque    = Z_NULL
+		, .avail_in  = _binary_mainwindow_gz_end - _binary_mainwindow_gz_start
+		, .next_in   = (Bytef *)_binary_mainwindow_gz_start
 		, .avail_out = *mainwindow_size
-		, .next_out = (Bytef *)buf
+		, .next_out  = (Bytef *)buf
 		} ;
 
 	// Must init with extra window size for gzip file format:
@@ -123,11 +119,13 @@ mainwindow_load (uint32_t *mainwindow_size)
 		free(buf);
 		return NULL;
 	}
+
 	// A single pass should be enough:
 	if (inflate(&stream, Z_FINISH) != Z_STREAM_END) {
 		free(buf);
 		return NULL;
 	}
+
 	inflateEnd(&stream);
 	return buf;
 }
@@ -142,15 +140,16 @@ ui_main (int argc, char **argv, const char *app_name)
 	gtk_init(&argc, &argv);
 
 	// Load the XML interface description string:
-	if ((mainwindow = mainwindow_load(&mainwindow_size)) == NULL) {
+	if (!(mainwindow = mainwindow_load(&mainwindow_size)))
 		return 1;
-	}
+
 	// Feed it to the builder:
 	GtkBuilder *builder = gtk_builder_new();
-	if (gtk_builder_add_from_string(builder, mainwindow, mainwindow_size, NULL) == 0) {
+	if (!gtk_builder_add_from_string(builder, mainwindow, mainwindow_size, NULL)) {
 		free(mainwindow);
 		return 1;
 	}
+
 	// Hookup signals, pass the workspace to every handler:
 	gtk_builder_connect_signals(builder, &ws);
 

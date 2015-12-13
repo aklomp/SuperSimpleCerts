@@ -54,12 +54,11 @@ on_popupmenu_new_ca (GtkMenuItem *menuitem, struct workspace **ws)
 	struct cert *cert;
 	(void)menuitem;
 
-	if (*ws == NULL && (*ws = workspace_new()) == NULL) {
+	if (*ws == NULL && !(*ws = workspace_new()))
 		return;
-	}
-	if ((cert = workspace_add_selfsigned_ca(*ws)) == NULL) {
+
+	if (!(cert = workspace_add_selfsigned_ca(*ws)))
 		return;
-	}
 }
 
 void
@@ -68,12 +67,11 @@ on_popupmenu_new_ssc (GtkMenuItem *menuitem, struct workspace **ws)
 	struct cert *cert;
 	(void)menuitem;
 
-	if (*ws == NULL && (*ws = workspace_new()) == NULL) {
+	if (*ws == NULL && !(*ws = workspace_new()))
 		return;
-	}
-	if ((cert = workspace_add_selfsigned(*ws)) == NULL) {
+
+	if (!(cert = workspace_add_selfsigned(*ws)))
 		return;
-	}
 }
 
 void
@@ -142,10 +140,16 @@ on_treeview_button_press (GtkTreeView *treeview, GdkEventButton *event, struct w
 		// Release path:
 		gtk_tree_path_free(path);
 	}
+
 	// Dispatch event:
 	switch (event->button) {
-		case 1: on_leftclick(treeview, event, got_iter, ws); break;
-		case 3: on_rightclick(treeview, event, got_iter, ws); break;
+	case 1:
+		on_leftclick(treeview, event, got_iter, ws);
+		break;
+
+	case 3:
+		on_rightclick(treeview, event, got_iter, ws);
+		break;
 	}
 }
 
