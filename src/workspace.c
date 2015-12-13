@@ -12,9 +12,9 @@ create (void)
 {
 	struct workspace *ws;
 
-	if ((ws = malloc(sizeof(*ws))) == NULL) {
+	if (!(ws = malloc(sizeof(*ws))))
 		return NULL;
-	}
+
 	ws->certs = NULL;
 
 	return ws;
@@ -29,9 +29,9 @@ callback_destroy_cert (struct cert *cert)
 static void
 destroy (struct workspace *ws)
 {
-	if (ws == NULL) {
+	if (!ws)
 		return;
-	}
+
 	treestore_foreach_cert(NULL, callback_destroy_cert);
 	treestore_empty();
 }
@@ -39,38 +39,33 @@ destroy (struct workspace *ws)
 struct workspace *
 workspace_new (void)
 {
-	struct workspace *ws;
-
-	if ((ws = create()) == NULL) {
-		return NULL;
-	}
-	return ws;
+	return create();
 }
 
 bool
 workspace_dirty (struct workspace *ws)
 {
-	if (ws == NULL) {
+	if (!ws)
 		return false;
-	}
+
 	return true;
 }
 
 bool
 workspace_save (struct workspace *ws)
 {
-	if (ws == NULL) {
+	if (!ws)
 		return true;
-	}
+
 	return true;
 }
 
 void
 workspace_close (struct workspace **ws)
 {
-	if (ws == NULL) {
+	if (!ws)
 		return;
-	}
+
 	destroy(*ws);
 	*ws = NULL;
 }
@@ -83,9 +78,9 @@ workspace_add_selfsigned_ca (struct workspace *ws)
 	struct cert *cert;
 	GtkTreeIter child;
 
-	if ((cert = cert_new(NULL, true, true)) == NULL) {
+	if (!(cert = cert_new(NULL, true, true)))
 		return NULL;
-	}
+
 	cert_set_displayname(cert, "New Selfsigned CA");
 	treestore_append_root(&child, cert);
 	return cert;
@@ -99,9 +94,9 @@ workspace_add_selfsigned (struct workspace *ws)
 	struct cert *cert;
 	GtkTreeIter child;
 
-	if ((cert = cert_new(NULL, true, false)) == NULL) {
+	if (!(cert = cert_new(NULL, true, false)))
 		return NULL;
-	}
+
 	cert_set_displayname(cert, "New Selfsigned");
 	treestore_append_root(&child, cert);
 	return cert;
@@ -118,12 +113,12 @@ workspace_add_child (struct workspace *ws, GtkTreeIter *parentIter)
 	GtkTreeIter childIter;
 
 	// Get parent cert:
-	if ((parent = treestore_cert_from_iter(parentIter)) == NULL) {
+	if (!(parent = treestore_cert_from_iter(parentIter)))
 		return NULL;
-	}
-	if ((child = cert_new(parent, false, false)) == NULL) {
+
+	if (!(child = cert_new(parent, false, false)))
 		return NULL;
-	}
+
 	cert_set_displayname(child, "New Child");
 	treestore_append_child(parentIter, &childIter, child);
 
@@ -137,13 +132,13 @@ workspace_delete_cert (struct workspace *ws, GtkTreeIter *iter)
 {
 	struct cert *cert;
 
-	if ((cert = treestore_cert_from_iter(iter)) == NULL) {
+	if (!(cert = treestore_cert_from_iter(iter)))
 		return;
-	}
+
 	// If this is the first cert of the lot, clear the pointer:
-	if (ws->certs == cert) {
+	if (ws->certs == cert)
 		ws->certs = NULL;
-	}
+
 	// Destroy all descendent certs:
 	treestore_foreach_cert(cert, callback_destroy_cert);
 

@@ -5,12 +5,16 @@
 #include "treestore.h"
 #include "workspace.h"
 
-static GtkTreeView *treeview = NULL;
-static GtkTreeViewColumn *column = NULL;
-static GtkMenu *popupmenublank = NULL;
-static GtkMenu *popupmenuca = NULL;
-static GtkMenu *popupmenussc = NULL;
-static GtkMenu *popupmenuchild = NULL;
+static struct {
+	GtkTreeView       *treeview;
+	GtkTreeViewColumn *column;
+	struct {
+		GtkMenu *blank;
+		GtkMenu *ca;
+		GtkMenu *ssc;
+		GtkMenu *child;
+	} popupmenu;
+} widgets;
 
 static void
 on_leftclick (GtkTreeView *treeview, GdkEventButton *event, gboolean got_iter, struct workspace **ws)
@@ -25,27 +29,31 @@ static void
 on_rightclick (GtkTreeView *treeview, GdkEventButton *event, gboolean got_iter, struct workspace **ws)
 {
 	struct cert *cert;
-	GtkMenu *menu = popupmenublank;
+	GtkMenu *menu = widgets.popupmenu.blank;
 
 	(void)treeview;
 
 	if (got_iter != FALSE)
 	{
 		// Fetch the certificate:
-		if ((cert = treestore_cert_from_iter(&(*ws)->popupIter)) == NULL) {
+		if (!(cert = treestore_cert_from_iter(&(*ws)->popupIter))) {
 			return;
 		}
 		if (cert->is_ca) {
-			menu = popupmenuca;
+			menu = widgets.popupmenu.ca;
 		}
 		else if (cert->is_selfsigned) {
-			menu = popupmenussc;
+			menu = widgets.popupmenu.ssc;
 		}
 		else {
-			menu = popupmenuchild;
+			menu = widgets.popupmenu.child;
 		}
 	}
-	gtk_menu_popup(menu, NULL, NULL, NULL, NULL, (event != NULL) ? event->button : 0, gdk_event_get_time((GdkEvent*)event));
+
+	// Display the popup menu:
+	gtk_menu_popup(menu, NULL, NULL, NULL, NULL,
+		(event != NULL) ? event->button : 0,
+		gdk_event_get_time((GdkEvent*)event));
 }
 
 void
@@ -186,8 +194,8 @@ void
 treeview_expand_iter (GtkTreeIter *iter)
 {
 	// Find path corresponding to iter, expand view till there:
-	GtkTreePath *path = gtk_tree_model_get_path(gtk_tree_view_get_model(treeview), iter);
-	gtk_tree_view_expand_to_path(treeview, path);
+	GtkTreePath *path = gtk_tree_model_get_path(gtk_tree_view_get_model(widgets.treeview), iter);
+	gtk_tree_view_expand_to_path(widgets.treeview, path);
 	gtk_tree_path_free(path);
 }
 
@@ -195,15 +203,15 @@ void
 treeview_init (GtkBuilder *builder)
 {
 	// Initialize our static variables from the Builder instance:
-	treeview = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview"));
-	column = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder, "treeviewcolumn"));
-	popupmenublank = GTK_MENU(gtk_builder_get_object(builder, "popupmenublank"));
-	popupmenuca = GTK_MENU(gtk_builder_get_object(builder, "popupmenuca"));
-	popupmenussc = GTK_MENU(gtk_builder_get_object(builder, "popupmenussc"));
-	popupmenuchild = GTK_MENU(gtk_builder_get_object(builder, "popupmenuchild"));
+	widgets.treeview	= GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview"));
+	widgets.column 		= GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder, "treeviewcolumn"));
+	widgets.popupmenu.blank	= GTK_MENU(gtk_builder_get_object(builder, "popupmenublank"));
+	widgets.popupmenu.ca	= GTK_MENU(gtk_builder_get_object(builder, "popupmenuca"));
+	widgets.popupmenu.ssc	= GTK_MENU(gtk_builder_get_object(builder, "popupmenussc"));
+	widgets.popupmenu.child	= GTK_MENU(gtk_builder_get_object(builder, "popupmenuchild"));
 
 	// Add text renderer for first column:
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	gtk_tree_view_column_pack_start(column, renderer, TRUE);
-	gtk_tree_view_column_add_attribute(column, renderer, "text", 0);
+	gtk_tree_view_column_pack_start(widgets.column, renderer, TRUE);
+	gtk_tree_view_column_add_attribute(widgets.column, renderer, "text", 0);
 }
