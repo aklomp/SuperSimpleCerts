@@ -1,3 +1,6 @@
+// Unlock strdup():
+#define _XOPEN_SOURCE 500
+
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,17 +12,17 @@ create (struct cert *parent, bool is_selfsigned, bool is_ca)
 {
 	struct cert *cert;
 
-	if ((cert = malloc(sizeof(*cert))) == NULL) {
+	if (!(cert = malloc(sizeof(*cert))))
 		return NULL;
-	}
-	cert->displayname = NULL;
-	cert->key = NULL;
-	cert->serial = NULL;
-	cert->not_before = NULL;
-	cert->not_after = NULL;
-	cert->parent = parent;
-	cert->is_selfsigned = is_selfsigned;
-	cert->is_ca = is_ca;
+
+	cert->displayname	= NULL;
+	cert->key		= NULL;
+	cert->serial		= NULL;
+	cert->not_before	= NULL;
+	cert->not_after		= NULL;
+	cert->parent		= parent;
+	cert->is_selfsigned	= is_selfsigned;
+	cert->is_ca		= is_ca;
 
 	return cert;
 }
@@ -27,9 +30,9 @@ create (struct cert *parent, bool is_selfsigned, bool is_ca)
 static void
 destroy (struct cert *cert)
 {
-	if (cert == NULL) {
+	if (!cert)
 		return;
-	}
+
 	free(cert->displayname);
 	free(cert->key);
 	free(cert->serial);
@@ -47,9 +50,9 @@ cert_new (struct cert *parent, bool is_selfsigned, bool is_ca)
 void
 cert_destroy (struct cert **cert)
 {
-	if (cert == NULL) {
+	if (!cert)
 		return;
-	}
+
 	destroy(*cert);
 	*cert = NULL;
 }
@@ -57,13 +60,8 @@ cert_destroy (struct cert **cert)
 void
 cert_set_displayname (struct cert *cert, const char *const displayname)
 {
-	size_t len = strlen(displayname) + 1;
-
-	if (cert->displayname != NULL) {
+	if (cert->displayname)
 		free(cert->displayname);
-	}
-	if ((cert->displayname = malloc(len)) == NULL) {
-		return;
-	}
-	memcpy(cert->displayname, displayname, len);
+
+	cert->displayname = strdup(displayname);
 }
